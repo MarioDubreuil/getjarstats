@@ -12,6 +12,12 @@ namespace getjarstats
             Console.WriteLine("*** begin ***");
             var directory = @"/Users/mario/Projects/getjarstats/getjarstats/data";
             var jarFiles = GetJarFiles(directory);
+            WriteJarFiles(jarFiles);
+            Console.WriteLine("*** end ***");
+        }
+
+        private static void WriteJarFiles(List<JarFile> jarFiles)
+        {
             foreach (var jarFile in jarFiles)
             {
                 Console.WriteLine($"file: {jarFile.JarFileName}");
@@ -28,7 +34,6 @@ namespace getjarstats
                 }
                 Console.WriteLine($"number of classes found: {jarClasses.Count}");
             }
-            Console.WriteLine("*** end ***");
         }
 
         private static List<JarFile> GetJarFiles(string directory)
