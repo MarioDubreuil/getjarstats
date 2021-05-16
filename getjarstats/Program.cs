@@ -15,13 +15,20 @@ namespace getjarstats
             var directory = @"/Users/mario/Projects/getjarstats/getjarstats/data";
             var jarFiles = GetJarFiles(directory);
             var javaArchives = new List<JavaArchive>();
+            var javaClasses = new List<JavaClass>();
             foreach (var jarFile in jarFiles)
             {
                 var javaArchive = new JavaArchive(jarFile);
                 javaArchives.Add(javaArchive);
+                foreach (var jarClass in jarFile.JarClasses)
+                {
+                    var javaClass = new JavaClass(jarClass);
+                    javaClasses.Add(javaClass);
+                }
             }
             WriteStatsJarFiles(jarFiles);
             WriteStatsJavaArchives(javaArchives);
+            WriteStatsJavaClasses(javaClasses);
             Console.WriteLine("*** end ***");
             Console.WriteLine("*** end ***");
             Console.WriteLine("*** end ***");
@@ -39,13 +46,13 @@ namespace getjarstats
                 foreach (var jarClass in jarClasses)
                 {
                     i++;
-                    Console.WriteLine($"class: {jarClass}");
-                    if (i >= 5)
+                    if (i > 5)
                     {
+                        Console.WriteLine("...");
                         break;
                     }
+                    Console.WriteLine($"class: {jarClass}");
                 }
-                Console.WriteLine("...");
             }
         }
 
@@ -55,6 +62,22 @@ namespace getjarstats
             foreach (var javaArchive in javaArchives)
             {
                 Console.WriteLine($"archive: {javaArchive.FileName}");
+            }
+        }
+
+        private static void WriteStatsJavaClasses(List<JavaClass> javaClasses)
+        {
+            Console.WriteLine($"number of java classes: {javaClasses.Count}");
+            int i = 0;
+            foreach (var javaClass in javaClasses)
+            {
+                i++;
+                if (i > 5)
+                {
+                    Console.WriteLine("...");
+                    break;
+                }
+                Console.WriteLine($"class: {javaClass.Name}");
             }
         }
 
