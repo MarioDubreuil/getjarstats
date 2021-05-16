@@ -14,9 +14,8 @@ namespace getjarstats
             var jarFiles = GetJarFiles(directory);
             foreach (var jarFile in jarFiles)
             {
-                var jarFileName = Path.GetFileName(jarFile);
-                Console.WriteLine($"file: {jarFileName}");
-                var jarClasses = GetJarClasses(jarFile);
+                Console.WriteLine($"file: {jarFile.JarFileName}");
+                var jarClasses = jarFile.JarClasses;
                 int i = 0;
                 foreach (var jarClass in jarClasses)
                 {
@@ -32,35 +31,16 @@ namespace getjarstats
             Console.WriteLine("*** end ***");
         }
 
-        private static List<string> GetJarClasses(string jarFile)
+        private static List<JarFile> GetJarFiles(string directory)
         {
-            var jarClasses = new List<string>();
-            using (var archive = ZipFile.OpenRead(jarFile))
-            {
-                foreach (var entry in archive.Entries)
-                {
-                    var classExtension = ".class";
-                    var jarClass = entry.FullName;
-                    if (jarClass.EndsWith(classExtension))
-                    {
-                        jarClass = jarClass.Substring(0, jarClass.Length - classExtension.Length);
-                        jarClass = jarClass.Replace("/", ".");
-                        jarClasses.Add(jarClass);
-                    }
-                }
-            }
-            return jarClasses;
-        }
-
-        private static List<string> GetJarFiles(string directory)
-        {
-            var jarFiles = new List<string>();
+            var jarFiles = new List<JarFile>();
             var files = Directory.GetFiles(directory);
             foreach (var file in files)
             {
                 if (file.EndsWith(".jar", StringComparison.OrdinalIgnoreCase))
                 {
-                    jarFiles.Add(file);
+                    var jarFile = new JarFile(file);
+                    jarFiles.Add(jarFile);
                 }
             }
             return jarFiles;
