@@ -12,35 +12,58 @@ namespace getjarstats
             Console.WriteLine("*** begin ***");
             Console.WriteLine("*** begin ***");
             Console.WriteLine("*** begin ***");
+            // TODO - Fix names (methods and variables)
             var directory = @"/Users/mario/Projects/getjarstats/getjarstats/data";
-            var jarFiles = GetJarFiles(directory);
-            var javaArchives = new List<JavaArchive>();
-            var javaClasses = new List<JavaClass>();
-            foreach (var jarFile in jarFiles)
-            {
-                var javaArchive = new JavaArchive(jarFile);
-                javaArchives.Add(javaArchive);
-                foreach (var jarClass in jarFile.JarClasses)
-                {
-                    var javaClass = new JavaClass(jarClass);
-                    javaClasses.Add(javaClass);
-                }
-            }
-            WriteStatsJarFiles(jarFiles);
-            WriteStatsJavaArchives(javaArchives);
-            WriteStatsJavaClasses(javaClasses);
+            var classes = GetArchivesClasses(directory);
+            WriteStats(classes);
             Console.WriteLine("*** end ***");
             Console.WriteLine("*** end ***");
             Console.WriteLine("*** end ***");
         }
 
-        private static void WriteStatsJarFiles(List<JarFile> jarFiles)
+        private static Dictionary<string, List<string>> GetArchivesClasses(string directory)
         {
-            Console.WriteLine($"number of jar files: {jarFiles.Count}");
-            foreach (var jarFile in jarFiles)
+            var classes = new Dictionary<string, List<string>>();
+            var files = Directory.GetFiles(directory);
+            foreach (var file in files)
             {
-                Console.WriteLine($"file: {jarFile.JarFileName}");
-                var jarClasses = jarFile.JarClasses;
+                if (file.EndsWith(".jar", StringComparison.OrdinalIgnoreCase))
+                {
+                    var archiveName = Path.GetFileName(file);
+                    var archiveClasses = GetArchiveClasses(file);
+                    classes.Add(archiveName, archiveClasses);
+                }
+            }
+            return classes;
+        }
+
+        private static List<string> GetArchiveClasses(string file)
+        {
+            var classes = new List<string>();
+            using (var archive = ZipFile.OpenRead(file))
+            {
+                foreach (var entry in archive.Entries)
+                {
+                    var className = entry.FullName;
+                    var classExtension = ".class";
+                    if (className.EndsWith(classExtension, StringComparison.OrdinalIgnoreCase))
+                    {
+                        className = className.Substring(0, className.Length - classExtension.Length);
+                        className = className.Replace("/", ".");
+                        classes.Add(className);
+                    }
+                }
+            }
+            return classes;
+        }
+
+        private static void WriteStats(Dictionary<string, List<string>> classes)
+        {
+            Console.WriteLine($"number of jar files: {classes.Count}");
+            foreach (var jarFile in classes)
+            {
+                Console.WriteLine($"file: {jarFile.Key}");
+                var jarClasses = jarFile.Value;
                 Console.WriteLine($"number of classes: {jarClasses.Count}");
                 int i = 0;
                 foreach (var jarClass in jarClasses)
@@ -54,46 +77,6 @@ namespace getjarstats
                     Console.WriteLine($"class: {jarClass}");
                 }
             }
-        }
-
-        private static void WriteStatsJavaArchives(List<JavaArchive> javaArchives)
-        {
-            Console.WriteLine($"number of java archives: {javaArchives.Count}");
-            foreach (var javaArchive in javaArchives)
-            {
-                Console.WriteLine($"archive: {javaArchive.FileName}");
-            }
-        }
-
-        private static void WriteStatsJavaClasses(List<JavaClass> javaClasses)
-        {
-            Console.WriteLine($"number of java classes: {javaClasses.Count}");
-            int i = 0;
-            foreach (var javaClass in javaClasses)
-            {
-                i++;
-                if (i > 5)
-                {
-                    Console.WriteLine("...");
-                    break;
-                }
-                Console.WriteLine($"class: {javaClass.Name}");
-            }
-        }
-
-        private static List<JarFile> GetJarFiles(string directory)
-        {
-            var jarFiles = new List<JarFile>();
-            var files = Directory.GetFiles(directory);
-            foreach (var file in files)
-            {
-                if (file.EndsWith(".jar", StringComparison.OrdinalIgnoreCase))
-                {
-                    var jarFile = new JarFile(file);
-                    jarFiles.Add(jarFile);
-                }
-            }
-            return jarFiles;
         }
     }
 }
