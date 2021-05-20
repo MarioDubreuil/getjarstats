@@ -13,18 +13,17 @@ namespace getjarstats
             Console.WriteLine("*** begin ***");
             Console.WriteLine("*** begin ***");
             // TODO - Fix names (methods and variables)
-            // test
             var directory = @"/Users/mario/Projects/getjarstats/getjarstats/data";
-            var classes = GetArchivesClasses(directory);
-            WriteStats(classes);
+            var classesByArchive = GetClassesByArchive(directory);
+            WriteStats(classesByArchive);
             Console.WriteLine("*** end ***");
             Console.WriteLine("*** end ***");
             Console.WriteLine("*** end ***");
         }
 
-        private static Dictionary<string, List<string>> GetArchivesClasses(string directory)
+        private static Dictionary<string, List<string>> GetClassesByArchive(string directory)
         {
-            var classes = new Dictionary<string, List<string>>();
+            var classesByArchive = new Dictionary<string, List<string>>();
             var files = Directory.GetFiles(directory);
             foreach (var file in files)
             {
@@ -32,10 +31,10 @@ namespace getjarstats
                 {
                     var archiveName = Path.GetFileName(file);
                     var archiveClasses = GetArchiveClasses(file);
-                    classes.Add(archiveName, archiveClasses);
+                    classesByArchive.Add(archiveName, archiveClasses);
                 }
             }
-            return classes;
+            return classesByArchive;
         }
 
         private static List<string> GetArchiveClasses(string file)
@@ -58,10 +57,10 @@ namespace getjarstats
             return classes;
         }
 
-        private static void WriteStats(Dictionary<string, List<string>> classes)
+        private static void WriteStats(Dictionary<string, List<string>> classesByArchive)
         {
-            Console.WriteLine($"number of jar files: {classes.Count}");
-            foreach (var jarFile in classes)
+            Console.WriteLine($"number of jar files: {classesByArchive.Count}");
+            foreach (var jarFile in classesByArchive)
             {
                 Console.WriteLine($"file: {jarFile.Key}");
                 var jarClasses = jarFile.Value;
