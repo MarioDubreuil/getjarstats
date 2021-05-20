@@ -13,6 +13,7 @@ namespace getjarstats
             Console.WriteLine("*** begin ***");
             Console.WriteLine("*** begin ***");
             // TODO - Fix names (methods and variables)
+            // test
             var directory = @"/Users/mario/Projects/getjarstats/getjarstats/data";
             var classes = GetArchivesClasses(directory);
             WriteStats(classes);
