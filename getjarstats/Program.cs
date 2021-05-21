@@ -12,7 +12,6 @@ namespace getjarstats
             Console.WriteLine("*** begin ***");
             Console.WriteLine("*** begin ***");
             Console.WriteLine("*** begin ***");
-            // TODO - Fix names (methods and variables)
             var directory = @"/Users/mario/Projects/getjarstats/getjarstats/data";
             var classesByArchive = GetClassesByArchive(directory);
             WriteStats(classesByArchive);
@@ -60,13 +59,13 @@ namespace getjarstats
         private static void WriteStats(Dictionary<string, List<string>> classesByArchive)
         {
             Console.WriteLine($"number of jar files: {classesByArchive.Count}");
-            foreach (var jarFile in classesByArchive)
+            foreach (var archive in classesByArchive)
             {
-                Console.WriteLine($"file: {jarFile.Key}");
-                var jarClasses = jarFile.Value;
-                Console.WriteLine($"number of classes: {jarClasses.Count}");
+                Console.WriteLine($"file: {archive.Key}");
+                var archiveClasses = archive.Value;
+                Console.WriteLine($"number of classes: {archiveClasses.Count}");
                 int i = 0;
-                foreach (var jarClass in jarClasses)
+                foreach (var archiveClass in archiveClasses)
                 {
                     i++;
                     if (i > 5)
@@ -74,7 +73,7 @@ namespace getjarstats
                         Console.WriteLine("...");
                         break;
                     }
-                    Console.WriteLine($"class: {jarClass}");
+                    Console.WriteLine($"class: {archiveClass}");
                 }
             }
         }
