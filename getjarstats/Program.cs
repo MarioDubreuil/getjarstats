@@ -14,7 +14,7 @@ namespace getjarstats
             Console.WriteLine("*** begin ***");
             var directory = @"/Users/mario/Projects/getjarstats/getjarstats/data";
             var classesByArchive = GetClassesByArchive(directory);
-            var archivesByClass = GetArchivesByClass(classesByArchive);
+            var archivesByClass = GetClassToArchivesDictionary(classesByArchive);
             // WriteStats(classesByArchive);
             Console.WriteLine("*** end ***");
             Console.WriteLine("*** end ***");
@@ -56,24 +56,23 @@ namespace getjarstats
             }
             return classes;
         }
-        private static Dictionary<string, List<string>> GetArchivesByClass(Dictionary<string, List<string>> javaClassesByArchiveDictionary)
+        private static Dictionary<string, List<string>> GetClassToArchivesDictionary(Dictionary<string, List<string>> archiveToClassesDictionary)
         {
-            var javaArchivesByclassDict = new Dictionary<string, List<string>>();
-            foreach (var javaArchive in javaClassesByArchiveDictionary)
+            var classToArchivesDictionary = new Dictionary<string, List<string>>();
+            foreach (var archiveToClassesItem in archiveToClassesDictionary)
             {
-                var javaArchiveName = javaArchive.Key;
-                var javaArchiveClasses = javaArchive.Value;
-                foreach (var javaArchiveClass in javaArchiveClasses)
+                var archiveName = archiveToClassesItem.Key;
+                var classes = archiveToClassesItem.Value;
+                foreach (var className in classes)
                 {
-                    // Console.WriteLine($"archive={javaArchiveName} class={javaArchiveClass}");
-                    if (!javaArchivesByclassDict.ContainsKey(javaArchiveClass))
+                    if (!classToArchivesDictionary.ContainsKey(className))
                     {
-                        javaArchivesByclassDict.Add(javaArchiveClass, new List<string>());
+                        classToArchivesDictionary.Add(className, new List<string>());
                     }
-                    javaArchivesByclassDict[javaArchiveClass].Add(javaArchiveName);
+                    classToArchivesDictionary[className].Add(archiveName);
                 }
             }
-            return javaArchivesByclassDict;
+            return classToArchivesDictionary;
         }
         private static void WriteStats(Dictionary<string, List<string>> classesByArchive)
         {
