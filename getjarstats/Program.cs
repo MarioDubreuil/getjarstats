@@ -14,7 +14,8 @@ namespace getjarstats
             Console.WriteLine("*** begin ***");
             var directory = @"/Users/mario/Projects/getjarstats/getjarstats/data";
             var classesByArchive = GetClassesByArchive(directory);
-            WriteStats(classesByArchive);
+            var archivesByClass = GetArchivesByClass(classesByArchive);
+            // WriteStats(classesByArchive);
             Console.WriteLine("*** end ***");
             Console.WriteLine("*** end ***");
             Console.WriteLine("*** end ***");
@@ -55,7 +56,25 @@ namespace getjarstats
             }
             return classes;
         }
-
+        private static Dictionary<string, List<string>> GetArchivesByClass(Dictionary<string, List<string>> javaClassesByArchiveDictionary)
+        {
+            var javaArchivesByclassDict = new Dictionary<string, List<string>>();
+            foreach (var javaArchive in javaClassesByArchiveDictionary)
+            {
+                var javaArchiveName = javaArchive.Key;
+                var javaArchiveClasses = javaArchive.Value;
+                foreach (var javaArchiveClass in javaArchiveClasses)
+                {
+                    // Console.WriteLine($"archive={javaArchiveName} class={javaArchiveClass}");
+                    if (!javaArchivesByclassDict.ContainsKey(javaArchiveClass))
+                    {
+                        javaArchivesByclassDict.Add(javaArchiveClass, new List<string>());
+                    }
+                    javaArchivesByclassDict[javaArchiveClass].Add(javaArchiveName);
+                }
+            }
+            return javaArchivesByclassDict;
+        }
         private static void WriteStats(Dictionary<string, List<string>> classesByArchive)
         {
             Console.WriteLine($"number of jar files: {classesByArchive.Count}");
