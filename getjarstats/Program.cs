@@ -9,42 +9,37 @@ namespace getjarstats
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("*** begin ***");
-            Console.WriteLine("*** begin ***");
-            Console.WriteLine("*** begin ***");
             var directory = @"/Users/mario/Projects/getjarstats/getjarstats/data";
-            var classesByArchive = GetClassesByArchive(directory);
-            var archivesByClass = GetClassToArchivesDictionary(classesByArchive);
-            // WriteStats(classesByArchive);
-            Console.WriteLine("*** end ***");
-            Console.WriteLine("*** end ***");
-            Console.WriteLine("*** end ***");
+            var archivesDictionary = GetArchivesDictionary(directory);
+            var classesDictionary = GetClassesDictionary(archivesDictionary);
+            var archivesWithDuplicateClassesDictionary = GetArchivesWithDuplicateClassesDictionary(classesDictionary);
+            WriteStats(archivesDictionary, classesDictionary, archivesWithDuplicateClassesDictionary);
         }
 
-        private static Dictionary<string, List<string>> GetClassesByArchive(string directory)
+        private static Dictionary<string, List<string>> GetArchivesDictionary(string directory)
         {
-            var classesByArchive = new Dictionary<string, List<string>>();
+            var archivesDictionary = new Dictionary<string, List<string>>();
             var files = Directory.GetFiles(directory);
             foreach (var file in files)
             {
                 if (file.EndsWith(".jar", StringComparison.OrdinalIgnoreCase))
                 {
-                    var archiveName = Path.GetFileName(file);
-                    var archiveClasses = GetArchiveClasses(file);
-                    classesByArchive.Add(archiveName, archiveClasses);
+                    var archive = Path.GetFileName(file);
+                    var classes = GetArchiveClasses(file);
+                    archivesDictionary.Add(archive, classes);
                 }
             }
-            return classesByArchive;
+            return archivesDictionary;
         }
 
         private static List<string> GetArchiveClasses(string file)
         {
             var classes = new List<string>();
-            using (var archive = ZipFile.OpenRead(file))
+            using (var zipArchive = ZipFile.OpenRead(file))
             {
-                foreach (var entry in archive.Entries)
+                foreach (var zipArchiveEntry in zipArchive.Entries)
                 {
-                    var className = entry.FullName;
+                    var className = zipArchiveEntry.FullName;
                     var classExtension = ".class";
                     if (className.EndsWith(classExtension, StringComparison.OrdinalIgnoreCase))
                     {
@@ -56,43 +51,67 @@ namespace getjarstats
             }
             return classes;
         }
-        private static Dictionary<string, List<string>> GetClassToArchivesDictionary(Dictionary<string, List<string>> archiveToClassesDictionary)
+        private static Dictionary<string, List<string>> GetClassesDictionary(Dictionary<string, List<string>> archivesDictionary)
         {
-            var classToArchivesDictionary = new Dictionary<string, List<string>>();
-            foreach (var archiveToClassesItem in archiveToClassesDictionary)
+            var classesDictionary = new Dictionary<string, List<string>>();
+            foreach (var archivesDictionaryItem in archivesDictionary)
             {
-                var archiveName = archiveToClassesItem.Key;
-                var classes = archiveToClassesItem.Value;
+                var archive = archivesDictionaryItem.Key;
+                var classes = archivesDictionaryItem.Value;
                 foreach (var className in classes)
                 {
-                    if (!classToArchivesDictionary.ContainsKey(className))
+                    if (!classesDictionary.ContainsKey(className))
                     {
-                        classToArchivesDictionary.Add(className, new List<string>());
+                        classesDictionary.Add(className, new List<string>());
                     }
-                    classToArchivesDictionary[className].Add(archiveName);
+                    classesDictionary[className].Add(archive);
                 }
             }
-            return classToArchivesDictionary;
+            return classesDictionary;
         }
-        private static void WriteStats(Dictionary<string, List<string>> classesByArchive)
+        private static Dictionary<string, List<string>> GetArchivesWithDuplicateClassesDictionary(Dictionary<string, List<string>> classesDictionary)
         {
-            Console.WriteLine($"number of jar files: {classesByArchive.Count}");
-            foreach (var archive in classesByArchive)
+            var archivesWithDuplicateClassesDictionary = new Dictionary<string, List<string>>();
+            foreach (var classesDictionaryItem in classesDictionary)
             {
-                Console.WriteLine($"file: {archive.Key}");
-                var archiveClasses = archive.Value;
-                Console.WriteLine($"number of classes: {archiveClasses.Count}");
-                int i = 0;
-                foreach (var archiveClass in archiveClasses)
+                var className = classesDictionaryItem.Key;
+                var archives = classesDictionaryItem.Value;
+                if (archives.Count > 1)
                 {
-                    i++;
-                    if (i > 5)
+                    var archiveNames = string.Join(",", archives);
+                    if (!archivesWithDuplicateClassesDictionary.ContainsKey(archiveNames))
                     {
-                        Console.WriteLine("...");
-                        break;
+                        archivesWithDuplicateClassesDictionary.Add(archiveNames, new List<string>());
                     }
-                    Console.WriteLine($"class: {archiveClass}");
+                    archivesWithDuplicateClassesDictionary[archiveNames].Add(className);
                 }
+            }
+            return archivesWithDuplicateClassesDictionary;
+        }
+        private static void WriteStats(Dictionary<string, List<string>> archivesDictionary, Dictionary<string, List<string>> classesDictionary, Dictionary<string, List<string>> archivesWithDuplicateClassesDictionary)
+        {
+            Console.WriteLine($"Found {classesDictionary.Count} classes in {archivesDictionary.Count} archives.");
+            int count = 0;
+            var duplicateArchivesHasSet = new HashSet<string>();
+            foreach (var classesDictionaryItem in classesDictionary)
+            {
+                var archives = classesDictionaryItem.Value;
+                if (archives.Count > 1)
+                {
+                    count++;
+                    foreach (var archive in archives)
+                    {
+                        duplicateArchivesHasSet.Add(archive);
+                    }
+                }
+            }
+            Console.WriteLine($"Found {duplicateArchivesHasSet.Count} archives with at least one class that is in another archive.");
+            Console.WriteLine($"Found {count} classes that are in more than 1 archive.");
+            foreach (var archivesWithDuplicateClassesDictionaryItem in archivesWithDuplicateClassesDictionary)
+            {
+                var archivesNames = archivesWithDuplicateClassesDictionaryItem.Key;
+                var classes = archivesWithDuplicateClassesDictionaryItem.Value;
+                Console.WriteLine($"Found {classes.Count} classes that are in each of those archives: {archivesNames}. One such class is {classes[0]}.");
             }
         }
     }
