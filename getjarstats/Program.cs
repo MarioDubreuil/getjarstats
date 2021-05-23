@@ -80,6 +80,7 @@ namespace getjarstats
                             // TODO: singular vs plural - Those duplicate classes vs This duplicate class
                             // TODO: singular vs plural - of the x classes vs of the 1 class
                             // TODO: fix local git because the hashset and getjarstats/hashset branches are still visible in vscode even though I deleted from github
+                            // TODO: test merging a branch locally instead of doing a pull request in github
                         }
                     }
                 }
