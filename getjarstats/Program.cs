@@ -73,21 +73,16 @@ namespace getjarstats
                             var percentageFirst =  duplicateClasses.Count * 100 / classesFirst.Count;
                             var percentageSecond =  duplicateClasses.Count * 100 / classesSecond.Count;
                             var randomDuplicateIndex = new Random().Next(duplicateClasses.Count);
-                            Console.WriteLine($"Found {duplicateClasses.Count:N0} duplicate classes between {archiveFirst} and {archiveSecond}.");
-                            Console.WriteLine($"Those duplicate classes represent {percentageFirst}% of the {classesFirst.Count:N0} classes in {archiveFirst} and {percentageSecond}% of the {classesSecond.Count:N0} classes in {archiveSecond}.");
-                            Console.WriteLine($"One such duplicate class is {duplicateClasses[randomDuplicateIndex]}.");
-                            // TODO: sort archives by name (ie don't use dictionary)
-                            // TODO: singular vs plural - Found x duplicate classes vs Found 1 duplicate class
-                            // TODO: singular vs plural - Those duplicate classes vs This duplicate class
-                            // TODO: singular vs plural - of the x classes vs of the 1 class
-                            // TODO: singular vs plural - did not find any duplicate...
+                            Console.WriteLine($"Found {duplicateClasses.Count:N0} duplicate class{(duplicateClasses.Count > 1 ? "es" : "")} between {archiveFirst} and {archiveSecond}.");
+                            Console.WriteLine($" {(duplicateClasses.Count > 1 ? "Those duplicate classes represent" : "This duplicate class represents")} {percentageFirst}% of the {classesFirst.Count:N0} class{(classesFirst.Count > 1 ? "es" : "")} in {archiveFirst} and {percentageSecond}% of the {classesSecond.Count:N0} class{(classesSecond.Count > 1 ? "es" : "")} in {archiveSecond}.");
+                            Console.WriteLine($" One such duplicate class is {duplicateClasses[randomDuplicateIndex]}.");
                         }
                     }
                 }
             }
             if (!duplicateFound)
             {
-                Console.WriteLine($"Did not find a duplicate class in {archivesDictionary.Count} jar files");
+                Console.WriteLine($"Did not find a duplicate class in {archivesDictionary.Count:N0} jar file{(archivesDictionary.Count > 1 ? "s" : "")}.");
             }
         }
     }
