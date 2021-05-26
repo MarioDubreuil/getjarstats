@@ -55,6 +55,7 @@ namespace getjarstats
         }
         private static void WriteStats(Dictionary<string, List<string>> archivesDictionary)
         {
+            bool duplicateFound = false;
             foreach (var archivesDictionaryFirstItem in archivesDictionary)
             {
                 var archiveFirst = archivesDictionaryFirstItem.Key;
@@ -68,21 +69,26 @@ namespace getjarstats
                         var duplicateClasses = classesFirst.Intersect(classesSecond).ToList();
                         if (duplicateClasses.Count > 0)
                         {
+                            duplicateFound = true;
                             var percentageFirst =  duplicateClasses.Count * 100 / classesFirst.Count;
                             var percentageSecond =  duplicateClasses.Count * 100 / classesSecond.Count;
                             Console.WriteLine($"Found {duplicateClasses.Count:N0} duplicate classes between {archiveFirst} and {archiveSecond}.");
                             Console.WriteLine($"Those duplicate classes represent {percentageFirst}% of the {classesFirst.Count:N0} classes in {archiveFirst} and {percentageSecond}% of the {classesSecond.Count:N0} classes in {archiveSecond}.");
                             Console.WriteLine($"One such duplicate class is {duplicateClasses[0]}.");
-                            // TODO: display no duplicate found message when no duplicate
                             // TODO: sort archives by name (ie don't use dictionary)
                             // TODO: randomly select a duplicate class
                             // TODO: singular vs plural - Found x duplicate classes vs Found 1 duplicate class
                             // TODO: singular vs plural - Those duplicate classes vs This duplicate class
                             // TODO: singular vs plural - of the x classes vs of the 1 class
+                            // TODO: singular vs plural - did not find any duplicate...
                             // TODO: test merging a branch locally instead of doing a pull request in github
                         }
                     }
                 }
+            }
+            if (!duplicateFound)
+            {
+                Console.WriteLine($"Did not find a duplicate class in {archivesDictionary.Count} archives");
             }
         }
     }
